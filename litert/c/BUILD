@@ -662,24 +662,23 @@ filegroup(
     srcs = [":litert_runtime_c_api_so"],
 )
 
-# Select libLiteRtRuntimeCApi.so or libLiteRtRuntimeCApi.dylib depending on the platform.
-filegroup(
+cc_import(
     name = "litert_runtime_c_api_so_or_dylib",
-    srcs = select({
-        "@org_tensorflow//tensorflow:ios": [":litert_runtime_c_api_dylib"],
-        "@org_tensorflow//tensorflow:macos": [":litert_runtime_c_api_dylib"],
-        "//conditions:default": [":litert_runtime_c_api_so"],
+    shared_library = select({
+        "@org_tensorflow//tensorflow:ios": ":litert_runtime_c_api_dylib",
+        "@org_tensorflow//tensorflow:macos": ":litert_runtime_c_api_dylib",
+        "//conditions:default": ":litert_runtime_c_api_so",
     }),
+    hdrs = glob(["*.h"]) + [
+        "//litert/c/internal:internal_headers",
+        "//litert/c/options:options_headers",
+        "//tflite:builtin_ops.h",
+        "//tflite/c:tensorflowlite_c_api_hdrs_filegroup",
+        "//tflite/core/c:headers_filegroup",
+    ],
 )
 
-# Config for LiteRT client executables to export LiteRt* symbols and let accelerator shared libs
-# resolve the symbols, not from libLiteRtRuntimeCApi.so.
-config_setting(
-    name = "resolve_symbols_in_exec",
-    define_values = {"resolve_symbols_in_exec": "true"},
-)
-
-# This is cc_library target based on `libLiteRtRuntimeCApi.so`.
+# cc_library target that depends on the shared library import
 cc_library(
     name = "litert_runtime_c_api_shared_lib",
     hdrs = glob(["*.h"]) + [
@@ -696,7 +695,7 @@ cc_library(
     }),
     linkstatic = 1,
     deps = [
-        ":litert_runtime_c_api_so_or_dylib",
+        ":litert_runtime_c_api_so_or_dylib",  # ✅ depends on cc_import now
         "@com_google_absl//absl/types:span",
         "@opencl_headers",
         "//litert/vendors/c:litert_dispatch_c_api",
