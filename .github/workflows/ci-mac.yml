@@ -30,7 +30,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       REFRESH_CACHE: ${{ github.event_name == 'schedule' ||
                          (github.event_name == 'workflow_dispatch' && inputs.REFRESH_CACHE) }}
-
+      HERMETIC_PYTHON_VERSION: "3.11"
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
