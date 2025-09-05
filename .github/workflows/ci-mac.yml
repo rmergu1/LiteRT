@@ -85,7 +85,7 @@ jobs:
           bazel build --disk_cache=~/.cache/bazel-macos \
             //litert/python/... \
             //litert/core/... \
-         # //litert/kotlin/...
+        #  //litert/kotlin/...
 
       - name: Run LiteRT tests
         run: |
