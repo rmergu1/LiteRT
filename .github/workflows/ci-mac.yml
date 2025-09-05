@@ -1,4 +1,4 @@
-name: "CI-Mac"
+name: "CI-Mac-LiteRT"
 on:
   push:
     tags:
@@ -7,7 +7,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 10 * * *"
+    - cron: "0 10 * * *"  # Daily cache refresh
   workflow_dispatch:
     inputs:
       REFRESH_CACHE:
@@ -21,20 +21,29 @@ concurrency:
 
 jobs:
   presubmit:
-    name: "Presubmit-Mac"
+    name: "Presubmit-Mac-LiteRT"
     runs-on: macos-latest
     permissions:
       actions: write
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
-      REFRESH_CACHE: ${{ github.event_name == 'schedule' ||
-                         (github.event_name == 'workflow_dispatch' && inputs.REFRESH_CACHE) }}
+      REFRESH_CACHE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.REFRESH_CACHE) }}
       HERMETIC_PYTHON_VERSION: "3.11"
-      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Configure TensorFlow & Python path
+        run: |
+          chmod +x configure.py
+          export PYTHON_BIN_PATH=$(which python3)
+          export PYTHON_LIB_PATH=$(python3 -c 'import site; print(site.getsitepackages()[0])')
+          export TF_NEED_ROCM=0
+          export TF_NEED_CUDA=0
+          export TF_SET_ANDROID_WORKSPACE=0
+          export CC_OPT_FLAGS='-Wno-sign-compare'
+          python3 configure.py
 
       - name: Set up cache keys
         id: cache-keys
@@ -50,11 +59,11 @@ jobs:
           echo "CACHE_RESTORE_KEY_HEAD=$CACHE_RESTORE_KEY_HEAD" >> "$GITHUB_OUTPUT"
           echo "CACHE_KEY=$CACHE_KEY" >> "$GITHUB_OUTPUT"
 
-      - name: Clean build outputs if cache is being refreshed
+      - name: Clean build outputs if refreshing cache
         if: env.REFRESH_CACHE == 'true'
         run: bazel clean --expunge
 
-      - name: Restore bazel cache if cache is not being refreshed
+      - name: Restore Bazel cache
         id: bazel-cache
         if: env.REFRESH_CACHE != 'true'
         uses: actions/cache/restore@v4
@@ -71,29 +80,27 @@ jobs:
         run: |
           echo "Cache Hit: ${{ steps.bazel-cache.outputs.cache-hit }}"
 
-      - name: Configure tensorflow & python path
+      - name: Build LiteRT targets needed for tests
         run: |
-          chmod +x configure.py
-          export PYTHON_BIN_PATH=$(which python3)
-          export PYTHON_LIB_PATH=$(python3 -c 'import site; print(site.getsitepackages()[0])')
-          export TF_NEED_ROCM=0
-          export TF_NEED_CUDA=0
-          export TF_SET_ANDROID_WORKSPACE=0
-          export CC_OPT_FLAGS='-Wno-sign-compare'
-          python3 configure.py
+          bazel build --disk_cache=~/.cache/bazel-macos \
+            //litert/python/... \
+            //litert/core/... \
+            //litert/kotlin/...
 
-      - name: Build LiteRT on macOS
-        run: bazel build --disk_cache=~/.cache/bazel-macos //litert/...
+      - name: Run LiteRT tests
+        run: |
+          bazel test --disk_cache=~/.cache/bazel-macos \
+            --test_output=errors \
+            //litert/python/... \
+            //litert/core/... \
+            //litert/kotlin/...
 
-      - name: Run LiteRT tests on macOS
-        run: bazel test --disk_cache=~/.cache/bazel-macos --test_output=errors //litert/...
-
-      - name: Remove cache if cache is being refreshed
+      - name: Remove cache if refreshing
         if: env.REFRESH_CACHE == 'true'
         continue-on-error: true
         run: gh cache delete ${{ steps.cache-keys.outputs.CACHE_KEY }}
 
-      - name: Save bazel cache if it's new or being refreshed
+      - name: Save Bazel cache
         uses: actions/cache/save@v4
         if: env.REFRESH_CACHE == 'true' || steps.bazel-cache.outputs.cache-hit != 'true'
         with:
