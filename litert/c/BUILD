@@ -682,15 +682,11 @@ config_setting(
 # This is cc_library target based on `libLiteRtRuntimeCApi.so`.
 cc_library(
     name = "litert_runtime_c_api_shared_lib",
-    srcs = select({
-        ":resolve_symbols_in_exec": [],
-        "//conditions:default": [":litert_runtime_c_api_so_or_dylib"],
-    }),
     hdrs = glob(["*.h"]) + [
         "//litert/c/internal:internal_headers",
         "//litert/c/options:options_headers",
-        "//tflite:builtin_ops.h",  # Needed for litert/c/litert_op_code.h
-        "//tflite/c:tensorflowlite_c_api_hdrs_filegroup",  # Needed for litert/c/litert_model.h
+        "//tflite:builtin_ops.h",
+        "//tflite/c:tensorflowlite_c_api_hdrs_filegroup",
         "//tflite/core/c:headers_filegroup",
     ],
     linkopts = select({
@@ -700,7 +696,7 @@ cc_library(
     }),
     linkstatic = 1,
     deps = [
-        # only depend on headers
+        ":litert_runtime_c_api_so_or_dylib",
         "@com_google_absl//absl/types:span",
         "@opencl_headers",
         "//litert/vendors/c:litert_dispatch_c_api",
