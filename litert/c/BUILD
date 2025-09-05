@@ -664,11 +664,7 @@ filegroup(
 
 cc_import(
     name = "litert_runtime_c_api_so_or_dylib",
-    shared_library = select({
-        "@org_tensorflow//tensorflow:ios": ":litert_runtime_c_api_dylib",
-        "@org_tensorflow//tensorflow:macos": ":litert_runtime_c_api_dylib",
-        "//conditions:default": ":litert_runtime_c_api_so",
-    }),
+    shared_library = ":litert_runtime_c_api_so",  # always use the .so
     hdrs = glob(["*.h"]) + [
         "//litert/c/internal:internal_headers",
         "//litert/c/options:options_headers",
