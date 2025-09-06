@@ -202,25 +202,6 @@ cc_library(
 )
 
 cc_library(
-    name = "litert_model",
-    srcs = ["litert_model.cc"],
-    hdrs = ["litert_model.h"],
-    deps = [
-        ":litert_common",
-        ":litert_layout",
-        ":litert_model_types",
-        ":litert_op_code",
-        "//litert/cc:litert_buffer_ref",
-        "//litert/cc:litert_macros",
-        "//litert/core/model",
-        "//litert/core/model:model_load",
-        "//litert/core/model:model_serialize",
-        "//tflite/core/c:private_c_api_types",
-        "@com_google_absl//absl/strings:string_view",
-    ],
-)
-
-cc_library(
     name = "litert_options",
     srcs = ["litert_options.cc"],
     hdrs = ["litert_options.h"],
