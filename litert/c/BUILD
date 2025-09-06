@@ -179,6 +179,12 @@ cc_library(
 )
 
 cc_library(
+    name = "litert_gl_types",
+    hdrs = ["litert_gl_types.h"],
+    deps = [":litert_common"],  # add any other dependencies needed
+)
+
+cc_library(
     name = "litert_tensor_buffer",
     srcs = ["litert_tensor_buffer.cc", "litert_tensor_buffer_requirements.cc"],
     hdrs = ["litert_tensor_buffer.h", "litert_tensor_buffer_requirements.h"],
