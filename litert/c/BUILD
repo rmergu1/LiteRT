@@ -97,6 +97,18 @@ cc_library(
 )
 
 cc_library(
+    name = "litert_model_hdrs",
+    hdrs = ["litert_model.h"],
+    tags = ["avoid_dep"],  # optional, prevents automatic linking
+    deps = [
+        ":litert_common",  # add if the headers depend on it
+        ":litert_layout",
+        ":litert_model_types",
+        ":litert_op_code",
+    ],
+)
+
+cc_library(
     name = "litert_logging",
     srcs = ["litert_logging.cc"],
     hdrs = ["litert_logging.h"],
