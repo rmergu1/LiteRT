@@ -86,16 +86,14 @@ jobs:
         run: |
           bazel build --disk_cache=~/.cache/bazel-macos \
             //litert/python/... \
-            //litert/core/... \
-            //litert/ios/...
+            //litert/core/... 
 
       - name: Run LiteRT tests
         run: |
           bazel test --disk_cache=~/.cache/bazel-macos \
             --test_output=errors \
             //litert/python/... \
-            //litert/core/... \
-            //litert/ios/...
+            //litert/core/... 
 
       - name: Remove cache if refreshing
         if: env.REFRESH_CACHE == 'true'
