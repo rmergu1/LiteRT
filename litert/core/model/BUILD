@@ -63,6 +63,7 @@ cc_library_with_testonly_vis(
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/types:span",
+        "//litert/c:litert_model",
     ],
 )
 
