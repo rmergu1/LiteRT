@@ -126,7 +126,6 @@ cc_library(
         ":litert_layout",
         ":litert_model_types",
         ":litert_op_code",
-        "//litert/c:litert_model",
         "//litert/cc:litert_buffer_ref",
         "//litert/cc:litert_macros",
         "//litert/core/model:model_load",
@@ -134,6 +133,7 @@ cc_library(
         "//tflite/core/c:private_c_api_types",
         "@com_google_absl//absl/strings:string_view",
     ],
+    visibility = ["//visibility:public"],  # export so other packages can depend on it
 )
 
 cc_library(
@@ -152,7 +152,8 @@ cc_library(
         ":litert_logging",
         ":litert_op_code",
         "//litert/cc:litert_macros",
-        "//litert/core/model",
+        "//litert/core/model:model_load",
+        "//litert/core/model:model_serialize",
         "//tflite/c:c_api_types",
         "//tflite/converter/core:model_builder_base",
         "//tflite/schema:schema_fbs",
@@ -333,7 +334,7 @@ cc_test(
 cc_test(
     name = "litert_model_test",
     srcs = ["litert_model_test.cc"],
-    deps = [":litert_common", ":litert_model", ":litert_op_code", "//litert/cc:litert_buffer_ref", "//litert/core/model", "//litert/core/util:flatbuffer_tools", "//litert/test:matchers", "@com_google_absl//absl/strings:string_view", "@com_google_absl//absl/types:span", "@com_google_googletest//:gtest_main"],
+    deps = [":litert_common", ":litert_model", ":litert_op_code", "//litert/cc:litert_buffer_ref", "//litert/core/model:model_load", "//litert/core/model:model_serialize", "//litert/core/util:flatbuffer_tools", "//litert/test:matchers", "@com_google_absl//absl/strings:string_view", "@com_google_absl//absl/types:span", "@com_google_googletest//:gtest_main"],
 )
 
 cc_test(
