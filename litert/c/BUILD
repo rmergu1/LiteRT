@@ -129,7 +129,6 @@ cc_library(
         "//litert/c:litert_model",
         "//litert/cc:litert_buffer_ref",
         "//litert/cc:litert_macros",
-        "//litert/core/model",
         "//litert/core/model:model_load",
         "//litert/core/model:model_serialize",
         "//tflite/core/c:private_c_api_types",
