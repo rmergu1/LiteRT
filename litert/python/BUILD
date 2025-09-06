@@ -32,12 +32,12 @@ py_strict_library(
 pywrap_library(
     name = "pywrap_litert",
     # Only provide Windows .def file; skip it entirely on macOS/Linux
-    common_lib_def_files_or_filters = select({
-        "@bazel_tools//src/conditions:windows": {
-            "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
-        },
-        "//conditions:default": {},  # empty for macOS/Linux
-    }),
+    common_lib_def_files_or_filters = {
+        "litert/python/pywrap_litert_common": select({
+            "@bazel_tools//src/conditions:windows": "//tflite/python:pywrap_tflite_common.json",
+            "//conditions:default": None,
+        }),
+    },
     # Linker options for each platform
     common_lib_linkopts = {
         "litert/python/pywrap_litert_common": select({
@@ -47,17 +47,13 @@ pywrap_library(
         }),
     },
     # Version scripts for each platform
-    common_lib_version_scripts = select({
-        "@bazel_tools//src/conditions:windows": {
-            "litert/python/pywrap_litert_common": None,
-        },
-        "@bazel_tools//src/conditions:darwin": {
-            "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common_darwin.lds",
-        },
-        "//conditions:default": {
-            "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
-        },
-    }),
+    common_lib_version_scripts = {
+        "litert/python/pywrap_litert_common": select({
+            "@bazel_tools//src/conditions:windows": None,
+            "@bazel_tools//src/conditions:darwin": "//tflite/python:pywrap_tflite_common_darwin.lds",
+            "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
+        }),
+    },
     pywrap_count = 11,
     visibility = ["//visibility:public"],
     deps = [
