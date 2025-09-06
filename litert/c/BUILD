@@ -78,6 +78,16 @@ cc_library(
 )
 
 cc_library(
+    name = "litert_environment_options_header",
+    hdrs = ["litert_environment_options.h"],
+    tags = ["avoid_dep"],  # optional: prevents automatic linking
+    deps = [
+        ":litert_any",
+        ":litert_common",
+    ],
+)
+
+cc_library(
     name = "litert_logging",
     srcs = ["litert_logging.cc"],
     hdrs = ["litert_logging.h"],
