@@ -126,6 +126,8 @@ cc_library(
         ":litert_layout",
         ":litert_model_types",
         ":litert_op_code",
+        "//litert/c:litert_model",
+        "//litert/core/model:model_helpers",
         "//litert/cc:litert_buffer_ref",
         "//litert/cc:litert_macros",
         "//litert/core/model",
