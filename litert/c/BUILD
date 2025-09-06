@@ -88,6 +88,15 @@ cc_library(
 )
 
 cc_library(
+    name = "litert_event_type",
+    hdrs = ["litert_event_type.h"],
+    tags = ["avoid_dep"],  # optional
+    deps = [
+        ":litert_common",  # if needed
+    ],
+)
+
+cc_library(
     name = "litert_logging",
     srcs = ["litert_logging.cc"],
     hdrs = ["litert_logging.h"],
