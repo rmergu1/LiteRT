@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Copyright 2024 Google LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
@@ -28,6 +42,34 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
+# --- Header-only / avoid_dep libraries ---
+cc_library(
+    name = "litert_model_hdrs",
+    hdrs = ["litert_model.h"],
+    tags = ["avoid_dep"],
+    deps = [":litert_common", ":litert_layout", ":litert_model_types", ":litert_op_code"],
+)
+
+cc_library(
+    name = "litert_tensor_buffer_types",
+    hdrs = ["litert_tensor_buffer_types.h"],
+    tags = ["avoid_dep"],
+    deps = [":litert_common"],
+)
+
+cc_library(
+    name = "litert_event_type",
+    hdrs = ["litert_event_type.h"],
+    tags = ["avoid_dep"],
+    deps = [":litert_common"],
+)
+
+cc_library(
+    name = "litert_event",
+    hdrs = ["litert_event.h"],
+    deps = [":litert_common", ":litert_event_type"],
+)
+
 # --- Core libraries ---
 cc_library(
     name = "litert_common",
@@ -36,9 +78,16 @@ cc_library(
 )
 
 cc_library(
-    name = "litert_custom_op_kernel",
-    hdrs = ["litert_custom_op_kernel.h"],
-    deps = [":litert_common", ":litert_layout"],
+    name = "litert_layout",
+    srcs = ["litert_layout.cc"],
+    hdrs = ["litert_layout.h"],
+    deps = [":litert_common"],
+)
+
+cc_library(
+    name = "litert_model_types",
+    hdrs = ["litert_model_types.h"],
+    deps = [":litert_common", ":litert_layout", ":litert_op_code"],
 )
 
 cc_library(
@@ -52,6 +101,20 @@ cc_library(
     hdrs = ["litert_metrics.h"],
     deps = [":litert_any", ":litert_common", "//litert/runtime:metrics"],
     alwayslink = 1,
+)
+
+cc_library(
+    name = "litert_environment_options",
+    srcs = ["litert_environment_options.cc"],
+    hdrs = ["litert_environment_options.h"],
+    deps = [":litert_any", ":litert_common", "//litert/cc:litert_macros", "//litert/core:environment_options"],
+)
+
+cc_library(
+    name = "litert_environment_options_header",
+    hdrs = ["litert_environment_options.h"],
+    tags = ["avoid_dep"],
+    deps = [":litert_any", ":litert_common"],
 )
 
 cc_library(
@@ -71,44 +134,6 @@ cc_library(
 )
 
 cc_library(
-    name = "litert_environment_options",
-    srcs = ["litert_environment_options.cc"],
-    hdrs = ["litert_environment_options.h"],
-    deps = [":litert_any", ":litert_common", "//litert/cc:litert_macros", "//litert/core:environment_options"],
-)
-
-cc_library(
-    name = "litert_environment_options_header",
-    hdrs = ["litert_environment_options.h"],
-    tags = ["avoid_dep"],  # optional: prevents automatic linking
-    deps = [
-        ":litert_any",
-        ":litert_common",
-    ],
-)
-
-cc_library(
-    name = "litert_event_type",
-    hdrs = ["litert_event_type.h"],
-    tags = ["avoid_dep"],  # optional
-    deps = [
-        ":litert_common",  # if needed
-    ],
-)
-
-cc_library(
-    name = "litert_model_hdrs",
-    hdrs = ["litert_model.h"],
-    tags = ["avoid_dep"],  # optional, prevents automatic linking
-    deps = [
-        ":litert_common",  # add if the headers depend on it
-        ":litert_layout",
-        ":litert_model_types",
-        ":litert_op_code",
-    ],
-)
-
-cc_library(
     name = "litert_logging",
     srcs = ["litert_logging.cc"],
     hdrs = ["litert_logging.h"],
@@ -116,38 +141,6 @@ cc_library(
         ":litert_common",
         "//tflite:minimal_logging",
         "//tflite/core/c:private_common",
-        "@com_google_absl//absl/strings:string_view",
-    ],
-)
-
-cc_library(
-    name = "litert_layout",
-    srcs = ["litert_layout.cc"],
-    hdrs = ["litert_layout.h"],
-    deps = [":litert_common"],
-)
-
-cc_library(
-    name = "litert_model_types",
-    hdrs = ["litert_model_types.h"],
-    deps = [":litert_common", ":litert_layout", ":litert_op_code"],
-)
-
-cc_library(
-    name = "litert_model",
-    srcs = ["litert_model.cc"],
-    hdrs = ["litert_model.h"],
-    deps = [
-        ":litert_common",
-        ":litert_layout",
-        ":litert_model_types",
-        ":litert_op_code",
-        "//litert/cc:litert_buffer_ref",
-        "//litert/cc:litert_macros",
-        "//litert/core/model",
-        "//litert/core/model:model_load",
-        "//litert/core/model:model_serialize",
-        "//tflite/core/c:private_c_api_types",
         "@com_google_absl//absl/strings:string_view",
     ],
 )
@@ -199,6 +192,31 @@ cc_library(
 )
 
 cc_library(
+    name = "litert_custom_tensor_buffer",
+    hdrs = ["litert_custom_tensor_buffer.h"],
+    deps = [":litert_common", ":litert_model_types", ":litert_tensor_buffer_types"],
+)
+
+cc_library(
+    name = "litert_model",
+    srcs = ["litert_model.cc"],
+    hdrs = ["litert_model.h"],
+    deps = [
+        ":litert_common",
+        ":litert_layout",
+        ":litert_model_types",
+        ":litert_op_code",
+        "//litert/cc:litert_buffer_ref",
+        "//litert/cc:litert_macros",
+        "//litert/core/model",
+        "//litert/core/model:model_load",
+        "//litert/core/model:model_serialize",
+        "//tflite/core/c:private_c_api_types",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
+cc_library(
     name = "litert_options",
     srcs = ["litert_options.cc"],
     hdrs = ["litert_options.h"],
@@ -230,12 +248,6 @@ cc_library(
     srcs = ["litert_opaque_options.cc"],
     hdrs = ["litert_opaque_options.h"],
     deps = [":litert_common"],
-)
-
-cc_library(
-    name = "litert_custom_tensor_buffer",
-    hdrs = ["litert_custom_tensor_buffer.h"],
-    deps = [":litert_common", ":litert_model_types", ":litert_tensor_buffer_types"],
 )
 
 cc_library(
