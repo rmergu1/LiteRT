@@ -1,4 +1,5 @@
-name: "CI-Mac-LiteRT"
+name: "CI-LiteRT"
+
 on:
   push:
     tags:
@@ -21,18 +22,34 @@ concurrency:
 
 jobs:
   presubmit:
-    name: "Presubmit-Mac-LiteRT"
-    runs-on: macos-latest
+    name: "Presubmit-${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
     permissions:
       actions: write
       contents: write
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            targets: "//litert/python/... //litert/core/... //litert/android/..."
+            cache_path: ~/.cache/bazel-linux
+          - os: macos-latest
+            targets: "//litert/python/... //litert/core/... //litert/ios/..."
+            cache_path: ~/.cache/bazel-macos
+
     env:
       GH_TOKEN: ${{ github.token }}
       REFRESH_CACHE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.REFRESH_CACHE) }}
       HERMETIC_PYTHON_VERSION: "3.11"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Configure TensorFlow & Python path
         run: |
@@ -48,7 +65,7 @@ jobs:
       - name: Set up cache keys
         id: cache-keys
         run: |
-          CACHE_RESTORE_KEY_2="${{ github.workflow }}"
+          CACHE_RESTORE_KEY_2="${{ github.workflow }}-${{ matrix.os }}"
           CACHE_RESTORE_KEY_1="$CACHE_RESTORE_KEY_2-${{ hashFiles('**/WORKSPACE', '**/.bazelrc') }}"
           CACHE_RESTORE_KEY_0="$CACHE_RESTORE_KEY_1-${{ hashFiles('**/BUILD*') }}"
           CACHE_RESTORE_KEY_HEAD="$CACHE_RESTORE_KEY_0-${{ github.event.pull_request.base.sha }}"
@@ -68,7 +85,7 @@ jobs:
         if: env.REFRESH_CACHE != 'true'
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/bazel-macos
+          path: ${{ matrix.cache_path }}
           key: ${{ steps.cache-keys.outputs.CACHE_KEY }}
           restore-keys: |
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_HEAD }}
@@ -76,24 +93,16 @@ jobs:
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_1 }}-
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_2 }}-
 
-      - name: Check cache hit
+      - name: Build LiteRT targets
         run: |
-          echo "Cache Hit: ${{ steps.bazel-cache.outputs.cache-hit }}"
-
-      - name: Build LiteRT targets needed for tests
-        run: |
-          bazel build --disk_cache=~/.cache/bazel-macos \
-            //litert/python/... \
-            //litert/core/... \
-        #  //litert/kotlin/...
+          bazel build --disk_cache=${{ matrix.cache_path }} \
+            ${{ matrix.targets }}
 
       - name: Run LiteRT tests
         run: |
-          bazel test --disk_cache=~/.cache/bazel-macos \
+          bazel test --disk_cache=${{ matrix.cache_path }} \
             --test_output=errors \
-            //litert/python/... \
-            //litert/core/... \
-        #  //litert/kotlin/...
+            ${{ matrix.targets }}
 
       - name: Remove cache if refreshing
         if: env.REFRESH_CACHE == 'true'
@@ -104,5 +113,5 @@ jobs:
         uses: actions/cache/save@v4
         if: env.REFRESH_CACHE == 'true' || steps.bazel-cache.outputs.cache-hit != 'true'
         with:
-          path: ~/.cache/bazel-macos
+          path: ${{ matrix.cache_path }}
           key: ${{ steps.cache-keys.outputs.CACHE_KEY }}
