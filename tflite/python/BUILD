@@ -693,24 +693,21 @@ py_strict_library(
 )
 
 pywrap_library(
-    name = "pywrap_tflite",
-    common_lib_def_files_or_filters = select({
-        "@bazel_tools//src/conditions:windows": {
-            "tflite/python/pywrap_tflite_common": "pywrap_tflite_common.json",
-        },
-        "//conditions:default": {},
-    }),
-    common_lib_version_scripts = {
-        "tflite/python/pywrap_tflite_common": select({
-            "@bazel_tools//src/conditions:windows": None,
-            "@bazel_tools//src/conditions:darwin": "pywrap_tflite_common_darwin.lds",
-            "//conditions:default": "pywrap_tflite_common.lds",
-        }),
+    name = "pywrap_litert",
+    common_lib_def_files_or_filters = {
+        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
     },
-    pywrap_count = 9,
+    common_lib_linkopts = {
+        "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
+    },
+    common_lib_version_scripts = {
+        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
+    },
+    pywrap_count = 11,
     visibility = ["//visibility:public"],
     deps = [
-        ":tflite_pywrap_deps",
+        ":litert_pywrap_deps",
+        "//tflite/python:tflite_pywrap_deps",
     ],
 )
 
