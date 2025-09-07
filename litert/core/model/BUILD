@@ -30,7 +30,6 @@ cc_library_with_testonly_vis(
     ],
     hdrs = [
         "model.h",
-        "//litert/c:litert_model_hdrs",
     ],
     vis = [
         "//litert:litert_internal_users",
@@ -43,6 +42,7 @@ cc_library_with_testonly_vis(
         "//litert/c:litert_common",
         "//litert/c:litert_layout",
         "//litert/c:litert_logging",
+        "//litert/c:litert_model_hdrs",   # ✅ move here
         "//litert/c:litert_model_types",
         "//litert/c:litert_op_code",
         "//litert/cc:litert_buffer_ref",
@@ -63,7 +63,6 @@ cc_library_with_testonly_vis(
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/types:span",
-        "//litert/c:litert_model",
     ],
 )
 
@@ -78,6 +77,7 @@ cc_test(
         ":model",
         "//litert/c:litert_common",
         "//litert/c:litert_op_code",
+        "//litert/c:litert_model",        # ✅ added
         "//litert/cc:litert_buffer_ref",
         "//litert/core:build_stamp",
         "//litert/core/util:flatbuffer_tools",
@@ -128,6 +128,7 @@ cc_test(
         ":model_serialize",
         "//litert/c:litert_common",
         "//litert/c:litert_op_code",
+        "//litert/c:litert_model",        # ✅ added
         "//litert/cc:litert_buffer_ref",
         "//litert/cc:litert_element_type",
         "//litert/cc:litert_expected",
@@ -317,6 +318,7 @@ cc_test(
         ":model_buffer",
         ":model_load",
         "//litert/c:litert_op_code",
+        "//litert/c:litert_model",        # ✅ added
         "//litert/core:dispatch_op_schema",
         "//litert/test:common",
         "//litert/test:simple_cascade_model_npu",
