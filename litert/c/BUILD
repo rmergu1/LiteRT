@@ -679,14 +679,24 @@ config_setting(
     define_values = {"resolve_symbols_in_exec": "true"},
 )
 
+cc_import(
+    name = "litert_runtime_c_api_prebuilt",
+    shared_library = select({
+        "@org_tensorflow//tensorflow:ios": ":litert_runtime_c_api_dylib",
+        "@org_tensorflow//tensorflow:macos": ":litert_runtime_c_api_dylib",
+        "//conditions:default": ":litert_runtime_c_api_so",
+    }),
+    hdrs = glob(["*.h"]),
+)
+
 # This is cc_library target based on `libLiteRtRuntimeCApi.so`.
 cc_library(
     name = "litert_runtime_c_api_shared_lib",
     hdrs = glob(["*.h"]) + [
         "//litert/c/internal:internal_headers",
         "//litert/c/options:options_headers",
-        "//tflite:builtin_ops.h",  # Needed for litert/c/litert_op_code.h
-        "//tflite/c:tensorflowlite_c_api_hdrs_filegroup",  # Needed for litert/c/litert_model.h
+        "//tflite:builtin_ops.h",
+        "//tflite/c:tensorflowlite_c_api_hdrs_filegroup",
         "//tflite/core/c:headers_filegroup",
     ],
     linkopts = select({
@@ -696,7 +706,7 @@ cc_library(
     }),
     linkstatic = 1,
     deps = [
-        ":litert_runtime_c_api_so_or_dylib",   # ✅ this is the key change
+        ":litert_runtime_c_api_prebuilt",   # ✅ now a proper cc_import
         "@com_google_absl//absl/types:span",
         "@opencl_headers",
         "//litert/vendors/c:litert_dispatch_c_api",
