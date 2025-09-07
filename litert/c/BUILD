@@ -682,10 +682,6 @@ config_setting(
 # This is cc_library target based on `libLiteRtRuntimeCApi.so`.
 cc_library(
     name = "litert_runtime_c_api_shared_lib",
-    srcs = select({
-        ":resolve_symbols_in_exec": [],
-        "//conditions:default": [":litert_runtime_c_api_so_or_dylib"],
-    }),
     hdrs = glob(["*.h"]) + [
         "//litert/c/internal:internal_headers",
         "//litert/c/options:options_headers",
@@ -700,7 +696,7 @@ cc_library(
     }),
     linkstatic = 1,
     deps = [
-        # only depend on headers
+        ":litert_runtime_c_api_so_or_dylib",   # ✅ this is the key change
         "@com_google_absl//absl/types:span",
         "@opencl_headers",
         "//litert/vendors/c:litert_dispatch_c_api",
