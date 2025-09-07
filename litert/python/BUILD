@@ -50,7 +50,7 @@ pywrap_library(
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": select({
             "@bazel_tools//src/conditions:windows": None,
-            "@bazel_tools//src/conditions:darwin": "//tflite/python:pywrap_tflite_common_darwin.lds",
+            # macOS and Linux share the same version script now
             "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
         }),
     },
