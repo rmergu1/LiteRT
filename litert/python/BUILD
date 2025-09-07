@@ -16,7 +16,6 @@ load("@org_tensorflow//tensorflow:strict.default.bzl", "py_strict_library")
 load("@org_tensorflow//tensorflow:tensorflow.default.bzl", "pywrap_binaries", "pywrap_library")
 
 package(
-    # copybara:uncomment default_applicable_licenses = ["@org_tensorflow//tensorflow:license"],
     default_visibility = ["//litert:litert_python_users"],
 )
 
@@ -29,30 +28,22 @@ py_strict_library(
     ],
 )
 
+# Main pywrap_library target
 pywrap_library(
     name = "pywrap_litert",
-    # Only provide Windows .def file; skip it entirely on macOS/Linux
+    # Provide Windows .def file (skip on macOS/Linux)
     common_lib_def_files_or_filters = {
-        "litert/python/pywrap_litert_common": select({
-            "@bazel_tools//src/conditions:windows": "//tflite/python:pywrap_tflite_common.json",
-            "//conditions:default": None,
-        }),
+        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
     },
     # Linker options for each platform
     common_lib_linkopts = {
-        "litert/python/pywrap_litert_common": select({
-            "@bazel_tools//src/conditions:windows": [],
-            "@bazel_tools//src/conditions:darwin": ["-Wl,-rpath,@loader_path/"],
-            "//conditions:default": ["-Wl,-rpath,$$ORIGIN/"],
-        }),
+        "litert/python/pywrap_litert_common": [
+            "-Wl,-rpath,$$ORIGIN/",  # works for Linux/macOS
+        ],
     },
-    # Version scripts for each platform
+    # Version script (used by macOS/Linux)
     common_lib_version_scripts = {
-        "litert/python/pywrap_litert_common": select({
-            "@bazel_tools//src/conditions:windows": None,
-            # macOS and Linux share the same version script now
-            "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
-        }),
+        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
     pywrap_count = 11,
     visibility = ["//visibility:public"],
