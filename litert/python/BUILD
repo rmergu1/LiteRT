@@ -29,18 +29,23 @@ py_strict_library(
     ],
 )
 
-# Windows-specific pywrap library
+# Windows-specific pywrap target
 pywrap_library(
     name = "pywrap_litert_windows",
     common_lib_def_files_or_filters = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
     },
-    pywrap_count = 11,
+    pywrap_count = 2,  # matches actual number of pywrap libraries
     visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
+    deps = [
+        ":litert_pywrap_deps",
+        "//litert/python/litert_wrapper/extra_dep_1",
+        "//litert/python/litert_wrapper/extra_dep_2",
+        "//litert/python/litert_wrapper/extra_dep_3",
+    ],
 )
 
-# Unix/macOS-specific pywrap library
+# Unix/macOS-specific pywrap target
 pywrap_library(
     name = "pywrap_litert_unix",
     common_lib_linkopts = {
@@ -49,9 +54,14 @@ pywrap_library(
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
-    pywrap_count = 11,
+    pywrap_count = 2,  # matches actual number of pywrap libraries
     visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
+    deps = [
+        ":litert_pywrap_deps",
+        "//litert/python/litert_wrapper/extra_dep_1",
+        "//litert/python/litert_wrapper/extra_dep_2",
+        "//litert/python/litert_wrapper/extra_dep_3",
+    ],
 )
 
 # Windows-specific binaries
