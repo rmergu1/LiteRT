@@ -29,7 +29,7 @@ py_strict_library(
     ],
 )
 
-# Windows-specific pywrap target
+# Windows-specific pywrap library
 pywrap_library(
     name = "pywrap_litert_windows",
     common_lib_def_files_or_filters = {
@@ -40,7 +40,7 @@ pywrap_library(
     deps = [":litert_pywrap_deps"],
 )
 
-# Unix/macOS-specific pywrap target
+# Unix/macOS-specific pywrap library
 pywrap_library(
     name = "pywrap_litert_unix",
     common_lib_linkopts = {
@@ -54,12 +54,26 @@ pywrap_library(
     deps = [":litert_pywrap_deps"],
 )
 
-# Platform-agnostic binary target
+# Windows-specific binaries
 pywrap_binaries(
+    name = "pywrap_litert_binaries_windows",
+    dep = ":pywrap_litert_windows",
+    visibility = ["//visibility:public"],
+)
+
+# Unix/macOS-specific binaries
+pywrap_binaries(
+    name = "pywrap_litert_binaries_unix",
+    dep = ":pywrap_litert_unix",
+    visibility = ["//visibility:public"],
+)
+
+# Cross-platform alias to pick correct binaries
+alias(
     name = "pywrap_litert_binaries",
-    dep = select({
-        "@bazel_tools//src/conditions:windows": ":pywrap_litert_windows",
-        "//conditions:default": ":pywrap_litert_unix",
+    actual = select({
+        "@bazel_tools//src/conditions:windows": ":pywrap_litert_binaries_windows",
+        "//conditions:default": ":pywrap_litert_binaries_unix",
     }),
     visibility = ["//visibility:public"],
 )
