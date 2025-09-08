@@ -29,22 +29,11 @@ py_strict_library(
     ],
 )
 
-# Windows-specific pywrap target
-pywrap_library(
-    name = "pywrap_litert_windows",
-    common_lib_def_files_or_filters = {
-        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
-    },
-    pywrap_count = 2,  # matches actual number of pywrap libraries
-    visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
-)
-
-# Unix/macOS-specific pywrap target
+# macOS/Linux-specific pywrap target
 pywrap_library(
     name = "pywrap_litert_unix",
     common_lib_linkopts = {
-        "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
+        "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],  # or "@loader_path/" if macOS
     },
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
@@ -54,28 +43,9 @@ pywrap_library(
     deps = [":litert_pywrap_deps"],
 )
 
-# Windows-specific binaries with unique prefix
+# macOS/Linux binaries
 pywrap_binaries(
-    name = "pywrap_litert_binaries_windows",
-    dep = ":pywrap_litert_windows",
-    output_name_prefix = "windows_",  # prevents conflicts
-    visibility = ["//visibility:public"],
-)
-
-# Unix/macOS-specific binaries with unique prefix
-pywrap_binaries(
-    name = "pywrap_litert_binaries_unix",
-    dep = ":pywrap_litert_unix",
-    output_name_prefix = "unix_",  # prevents conflicts
-    visibility = ["//visibility:public"],
-)
-
-# Cross-platform alias to pick correct binaries
-alias(
     name = "pywrap_litert_binaries",
-    actual = select({
-        "@bazel_tools//src/conditions:windows": ":pywrap_litert_binaries_windows",
-        "//conditions:default": ":pywrap_litert_binaries_unix",
-    }),
+    dep = ":pywrap_litert_unix",
     visibility = ["//visibility:public"],
 )
