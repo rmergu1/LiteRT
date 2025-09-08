@@ -1,7 +1,7 @@
 # Copyright 2025 Google LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
-# You may not use this file except in compliance with the License.
+# you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
@@ -19,7 +19,9 @@ package(
     default_visibility = ["//litert:litert_python_users"],
 )
 
-# Common dependencies for pywrap targets
+# --------------------------
+# Common pywrap dependencies
+# --------------------------
 py_strict_library(
     name = "litert_pywrap_deps",
     visibility = ["//visibility:public"],
@@ -29,18 +31,22 @@ py_strict_library(
     ],
 )
 
+# --------------------------
 # Windows-specific pywrap target
+# --------------------------
 pywrap_library(
     name = "pywrap_litert_windows",
     common_lib_def_files_or_filters = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
     },
-    pywrap_count = 2,
+    pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
+# --------------------------
 # Unix/macOS-specific pywrap target
+# --------------------------
 pywrap_library(
     name = "pywrap_litert_unix",
     common_lib_linkopts = {
@@ -49,12 +55,14 @@ pywrap_library(
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
-    pywrap_count = 2,
+    pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
-# Windows-specific binaries (with unique output names)
+# --------------------------
+# Platform-specific binaries
+# --------------------------
 pywrap_binaries(
     name = "pywrap_litert_binaries_windows",
     dep = ":pywrap_litert_windows",
@@ -62,7 +70,6 @@ pywrap_binaries(
     output_name_suffix = "_windows",
 )
 
-# Unix/macOS-specific binaries (with unique output names)
 pywrap_binaries(
     name = "pywrap_litert_binaries_unix",
     dep = ":pywrap_litert_unix",
@@ -70,7 +77,9 @@ pywrap_binaries(
     output_name_suffix = "_unix",
 )
 
-# Cross-platform alias to pick the correct binaries
+# --------------------------
+# Cross-platform alias to pick correct binaries
+# --------------------------
 alias(
     name = "pywrap_litert_binaries",
     actual = select({
