@@ -1,7 +1,7 @@
 # Copyright 2025 Google LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
+# You may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
@@ -37,12 +37,7 @@ pywrap_library(
     },
     pywrap_count = 2,  # matches actual number of pywrap libraries
     visibility = ["//visibility:public"],
-    deps = [
-        ":litert_pywrap_deps",
-        "//litert/python/litert_wrapper/extra_dep_1",
-        "//litert/python/litert_wrapper/extra_dep_2",
-        "//litert/python/litert_wrapper/extra_dep_3",
-    ],
+    deps = [":litert_pywrap_deps"],
 )
 
 # Unix/macOS-specific pywrap target
@@ -56,12 +51,7 @@ pywrap_library(
     },
     pywrap_count = 2,  # matches actual number of pywrap libraries
     visibility = ["//visibility:public"],
-    deps = [
-        ":litert_pywrap_deps",
-        "//litert/python/litert_wrapper/extra_dep_1",
-        "//litert/python/litert_wrapper/extra_dep_2",
-        "//litert/python/litert_wrapper/extra_dep_3",
-    ],
+    deps = [":litert_pywrap_deps"],
 )
 
 # Windows-specific binaries
