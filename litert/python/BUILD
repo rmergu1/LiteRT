@@ -19,9 +19,7 @@ package(
     default_visibility = ["//litert:litert_python_users"],
 )
 
-# --------------------------
-# Common pywrap dependencies
-# --------------------------
+# Common dependencies for pywrap targets
 py_strict_library(
     name = "litert_pywrap_deps",
     visibility = ["//visibility:public"],
@@ -31,22 +29,20 @@ py_strict_library(
     ],
 )
 
-# --------------------------
 # Windows-specific pywrap target
-# --------------------------
 pywrap_library(
     name = "pywrap_litert_windows",
     common_lib_def_files_or_filters = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.json",
     },
-    pywrap_count = 2,  # actual number of pywrap libraries
+    pywrap_count = 2,  # actual number of pywrap deps
     visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
+    deps = [
+        ":litert_pywrap_deps",
+    ],
 )
 
-# --------------------------
 # Unix/macOS-specific pywrap target
-# --------------------------
 pywrap_library(
     name = "pywrap_litert_unix",
     common_lib_linkopts = {
@@ -55,31 +51,28 @@ pywrap_library(
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
-    pywrap_count = 2,  # actual number of pywrap libraries
+    pywrap_count = 2,  # actual number of pywrap deps
     visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
+    deps = [
+        ":litert_pywrap_deps",
+    ],
 )
 
-# --------------------------
-# Platform-specific binaries
-# --------------------------
+# Windows-specific binaries
 pywrap_binaries(
     name = "pywrap_litert_binaries_windows",
     dep = ":pywrap_litert_windows",
     visibility = ["//visibility:public"],
-    output_name_suffix = "_windows",
 )
 
+# Unix/macOS-specific binaries
 pywrap_binaries(
     name = "pywrap_litert_binaries_unix",
     dep = ":pywrap_litert_unix",
     visibility = ["//visibility:public"],
-    output_name_suffix = "_unix",
 )
 
-# --------------------------
 # Cross-platform alias to pick correct binaries
-# --------------------------
 alias(
     name = "pywrap_litert_binaries",
     actual = select({
