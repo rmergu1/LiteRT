@@ -37,37 +37,44 @@ py_strict_library(
 # -----------------------------------------------------------------------------
 pywrap_library(
     name = "pywrap_litert_unix",
-    # No Windows .def files here
     common_lib_linkopts = {
         "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
     },
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
-    pywrap_count = 2,  # actual number of pywrap libraries
-    visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
-)
-
-# -----------------------------------------------------------------------------
-# Windows-specific pywrap target (stub for now)
-# -----------------------------------------------------------------------------
-pywrap_library(
-    name = "pywrap_litert_windows",
-    # Keep it minimal; no win_def_file since not supported
     pywrap_count = 2,
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
 # -----------------------------------------------------------------------------
-# OS-aware binaries that pick the correct implementation
+# Windows-specific pywrap target (minimal stub)
 # -----------------------------------------------------------------------------
-pywrap_binaries(
-    name = "pywrap_litert_binaries",
-    dep = select({
+pywrap_library(
+    name = "pywrap_litert_windows",
+    pywrap_count = 2,
+    visibility = ["//visibility:public"],
+    deps = [":litert_pywrap_deps"],
+)
+
+# -----------------------------------------------------------------------------
+# Aliases for OS-specific deps
+# -----------------------------------------------------------------------------
+alias(
+    name = "pywrap_litert_selected",
+    actual = select({
         "@bazel_tools//src/conditions:windows": ":pywrap_litert_windows",
         "//conditions:default": ":pywrap_litert_unix",
     }),
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------------------------------------
+# OS-aware binaries (wraps the alias above)
+# -----------------------------------------------------------------------------
+pywrap_binaries(
+    name = "pywrap_litert_binaries",
+    dep = ":pywrap_litert_selected",
     visibility = ["//visibility:public"],
 )
