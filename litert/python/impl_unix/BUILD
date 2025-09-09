@@ -1,4 +1,3 @@
-# Unix/macOS implementation
 load("@org_tensorflow//tensorflow:tensorflow.default.bzl", "pywrap_binaries", "pywrap_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -13,9 +12,11 @@ pywrap_library(
     },
     pywrap_count = 2,
     deps = ["//litert/python:litert_pywrap_deps"],
+    visibility = ["//visibility:public"],
 )
 
 pywrap_binaries(
     name = "pywrap_litert_binaries_unix",
     dep = ":pywrap_litert_unix",
+    visibility = ["//visibility:public"],
 )
