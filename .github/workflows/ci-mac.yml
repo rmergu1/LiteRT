@@ -76,7 +76,7 @@ jobs:
           rm -rf ~/.cache/bazel-macos
 
       - name: Install correct Bazel
-        uses: bazel-contrib/setup-bazel@0.15.0
+        uses: bazelbuild/setup-bazelisk@v3
         # with:
         #   bazel-version: 7.6.1
 
