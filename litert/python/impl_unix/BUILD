@@ -11,6 +11,8 @@ pywrap_library(
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
     pywrap_count = 2,
+    # ⬇️ Explicitly tell Bazel: no Windows DEF parsing
+    win_def_file = None,
     deps = ["//litert/python:litert_pywrap_deps"],
     visibility = ["//visibility:public"],
 )
