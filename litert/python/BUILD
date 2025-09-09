@@ -59,22 +59,13 @@ pywrap_library(
 )
 
 # -----------------------------------------------------------------------------
-# Aliases for OS-specific deps
-# -----------------------------------------------------------------------------
-alias(
-    name = "pywrap_litert_selected",
-    actual = select({
-        "@bazel_tools//src/conditions:windows": ":pywrap_litert_windows",
-        "//conditions:default": ":pywrap_litert_unix",
-    }),
-    visibility = ["//visibility:public"],
-)
-
-# -----------------------------------------------------------------------------
-# OS-aware binaries (wraps the alias above)
+# OS-aware binaries
 # -----------------------------------------------------------------------------
 pywrap_binaries(
     name = "pywrap_litert_binaries",
-    dep = ":pywrap_litert_selected",
+    dep = select({
+        "@bazel_tools//src/conditions:windows": ":pywrap_litert_windows",
+        "//conditions:default": ":pywrap_litert_unix",
+    }),
     visibility = ["//visibility:public"],
 )
