@@ -29,22 +29,31 @@ py_strict_library(
     ],
 )
 
-# Unix/macOS-specific pywrap target
+# Platform-specific .def files (Windows only)
+win_def_files = select({
+    "@bazel_tools//src/conditions:windows": [
+        "_pywrap_litert_unix_common_def.gen.def",
+    ],
+    "//conditions:default": [],
+})
+
+# Cross-platform pywrap target
 pywrap_library(
     name = "pywrap_litert_unix",
-    # No Windows .def files
     common_lib_linkopts = {
         "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
     },
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
+    # Only include Windows .def files on Windows
+    win_def_file = win_def_files,
     pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
-# Unix/macOS-specific binaries
+# Cross-platform binaries
 pywrap_binaries(
     name = "pywrap_litert_binaries",
     dep = ":pywrap_litert_unix",
