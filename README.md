@@ -1,7 +1,7 @@
 # LiteRT
 
 Google's On-device framework for high-performance ML & GenAI deployment on edge
-platforms, via efficient conversion, runtime, and optimization
+platforms, via efficient conversion, runtime, and optimization.
 
 📖 [Get Started](#-installation) | 🤝 [Contributing](#-contributing) | 📜
 [License](#-license) | 🛡 [Security Policy](SECURITY.md) | 📄
