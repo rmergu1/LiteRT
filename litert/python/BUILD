@@ -6,11 +6,12 @@
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
+# Unless required by applicable law or agreed to in writing,
 # distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied.
+# See the License for the specific language governing permissions
+# and limitations under the License.
 
 load("@org_tensorflow//tensorflow:strict.default.bzl", "py_strict_library")
 load("@org_tensorflow//tensorflow:tensorflow.default.bzl", "pywrap_binaries", "pywrap_library")
@@ -19,7 +20,9 @@ package(
     default_visibility = ["//litert:litert_python_users"],
 )
 
+# -----------------------------------------------------------------------------
 # Common dependencies for pywrap targets
+# -----------------------------------------------------------------------------
 py_strict_library(
     name = "litert_pywrap_deps",
     visibility = ["//visibility:public"],
@@ -29,33 +32,42 @@ py_strict_library(
     ],
 )
 
-# Platform-specific .def files (Windows only)
-win_def_files = select({
-    "@bazel_tools//src/conditions:windows": [
-        "_pywrap_litert_unix_common_def.gen.def",
-    ],
-    "//conditions:default": [],
-})
-
-# Cross-platform pywrap target
+# -----------------------------------------------------------------------------
+# Unix/macOS-specific pywrap target
+# -----------------------------------------------------------------------------
 pywrap_library(
     name = "pywrap_litert_unix",
+    # No Windows .def files here
     common_lib_linkopts = {
         "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
     },
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
-    # Only include Windows .def files on Windows
-    win_def_file = win_def_files,
     pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
-# Cross-platform binaries
+# -----------------------------------------------------------------------------
+# Windows-specific pywrap target (stub for now)
+# -----------------------------------------------------------------------------
+pywrap_library(
+    name = "pywrap_litert_windows",
+    # Keep it minimal; no win_def_file since not supported
+    pywrap_count = 2,
+    visibility = ["//visibility:public"],
+    deps = [":litert_pywrap_deps"],
+)
+
+# -----------------------------------------------------------------------------
+# OS-aware binaries that pick the correct implementation
+# -----------------------------------------------------------------------------
 pywrap_binaries(
     name = "pywrap_litert_binaries",
-    dep = ":pywrap_litert_unix",
+    dep = select({
+        "@bazel_tools//src/conditions:windows": ":pywrap_litert_windows",
+        "//conditions:default": ":pywrap_litert_unix",
+    }),
     visibility = ["//visibility:public"],
 )
