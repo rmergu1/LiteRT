@@ -38,7 +38,8 @@ alias(
     name = "pywrap_litert_binaries",
     actual = select({
         "@bazel_tools//src/conditions:windows": "//litert/python/impl_windows:pywrap_litert_binaries_windows",
-        "//conditions:default": "//litert/python/impl_unix:pywrap_litert_binaries_unix",
+        "//conditions:default": ":pywrap_litert_binaries_unix",
     }),
     visibility = ["//visibility:public"],
 )
+
