@@ -74,11 +74,33 @@ jobs:
         run: |
           bazel clean --expunge
           rm -rf ~/.cache/bazel-macos
+          
+      - name: Install JDK 11+
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          
+      - name: Clone Bazel repo
+        run: |
+          git clone https://github.com/bazelbuild/bazel.git
+          cd bazel
+          git checkout tags/7.6.1
 
-      - name: Install correct Bazel
-        uses: bazelbuild/setup-bazelisk@v3
-        # with:
-        #   bazel-version: 7.6.1
+      - name: Compile Bazel from source
+        working-directory: ./bazel
+        run: ./compile.sh
+
+      - name: Add Bazel binary to PATH
+        run: echo "${{ github.workspace }}/bazel/output" >> $GITHUB_PATH
+
+      - name: Verify Bazel version
+        run: bazel --version
+
+      # - name: Install correct Bazel
+      #   uses: bazelbuild/setup-bazelisk@v3
+      #   # with:
+      #   #   bazel-version: 7.6.1
 
       - name: Restore Bazel cache
         id: bazel-cache
