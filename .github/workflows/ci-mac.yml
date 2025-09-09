@@ -86,16 +86,62 @@ jobs:
 
       - name: Build LiteRT targets
         run: |
-          bazel build --disk_cache=~/.cache/bazel-macos \
+          set -e
+
+          # Choose the bazel platform labels per runner OS
+          if [ "${{ runner.os }}" = "macOS" ] || [ "${{ runner.os }}" = "macos" ]; then
+            PLATFORM_FLAGS="--host_platform=@bazel_tools//platforms:osx --platforms=@bazel_tools//platforms:osx"
+          elif [ "${{ runner.os }}" = "Windows" ]; then
+            # On GitHub Windows runner the shell in YAML is powershell/cmd. We only
+            # run this step on macos-latest in your job but keeping Windows option
+            # here for completeness and local dev. If running on Windows, you would
+            # adapt to powershell-style commands. Example label below:
+            PLATFORM_FLAGS="--host_platform=@bazel_tools//platforms:windows --platforms=@bazel_tools//platforms:windows"
+          else
+            # Linux (ubuntu)
+            PLATFORM_FLAGS="--host_platform=@bazel_tools//platforms:linux --platforms=@bazel_tools//platforms:linux"
+          fi
+
+          bazel build --disk_cache=$HOME/.cache/bazel-macos \
+            ${PLATFORM_FLAGS} \
+            --features=-windows_export_all_symbols \
+            --verbose_failures \
             //litert/python/... \
-            //litert/core/... 
+            //litert/core/...
 
       - name: Run LiteRT tests
         run: |
-          bazel test --disk_cache=~/.cache/bazel-macos \
+          set -e
+
+          if [ "${{ runner.os }}" = "macOS" ] || [ "${{ runner.os }}" = "macos" ]; then
+            PLATFORM_FLAGS="--host_platform=@bazel_tools//platforms:osx --platforms=@bazel_tools//platforms:osx"
+          elif [ "${{ runner.os }}" = "Windows" ]; then
+            PLATFORM_FLAGS="--host_platform=@bazel_tools//platforms:windows --platforms=@bazel_tools//platforms:windows"
+          else
+            PLATFORM_FLAGS="--host_platform=@bazel_tools//platforms:linux --platforms=@bazel_tools//platforms:linux"
+          fi
+
+          bazel test --disk_cache=$HOME/.cache/bazel-macos \
+            ${PLATFORM_FLAGS} \
+            --features=-windows_export_all_symbols \
             --test_output=errors \
+            --verbose_failures \
             //litert/python/... \
-            //litert/core/... 
+            //litert/core/...
+
+
+      # - name: Build LiteRT targets
+      #   run: |
+      #     bazel build --disk_cache=~/.cache/bazel-macos \
+      #       //litert/python/... \
+      #       //litert/core/... 
+
+      # - name: Run LiteRT tests
+      #   run: |
+      #     bazel test --disk_cache=~/.cache/bazel-macos \
+      #       --test_output=errors \
+      #       //litert/python/... \
+      #       //litert/core/... 
 
       - name: Remove cache if refreshing
         if: env.REFRESH_CACHE == 'true'
