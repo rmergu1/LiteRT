@@ -21,7 +21,7 @@ package(
 )
 
 # -----------------------------------------------------------------------------
-# Common dependencies for pywrap targets
+# Common dependencies
 # -----------------------------------------------------------------------------
 py_strict_library(
     name = "litert_pywrap_deps",
@@ -33,7 +33,7 @@ py_strict_library(
 )
 
 # -----------------------------------------------------------------------------
-# Unix/macOS-specific pywrap target
+# Unix/macOS
 # -----------------------------------------------------------------------------
 pywrap_library(
     name = "pywrap_litert_unix",
@@ -48,8 +48,14 @@ pywrap_library(
     deps = [":litert_pywrap_deps"],
 )
 
+pywrap_binaries(
+    name = "pywrap_litert_binaries_unix",
+    dep = ":pywrap_litert_unix",
+    visibility = ["//visibility:public"],
+)
+
 # -----------------------------------------------------------------------------
-# Windows-specific pywrap target (minimal stub)
+# Windows
 # -----------------------------------------------------------------------------
 pywrap_library(
     name = "pywrap_litert_windows",
@@ -58,14 +64,20 @@ pywrap_library(
     deps = [":litert_pywrap_deps"],
 )
 
-# -----------------------------------------------------------------------------
-# OS-aware binaries
-# -----------------------------------------------------------------------------
 pywrap_binaries(
+    name = "pywrap_litert_binaries_windows",
+    dep = ":pywrap_litert_windows",
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------------------------------------
+# Public selector
+# -----------------------------------------------------------------------------
+alias(
     name = "pywrap_litert_binaries",
-    dep = select({
-        "@bazel_tools//src/conditions:windows": ":pywrap_litert_windows",
-        "//conditions:default": ":pywrap_litert_unix",
+    actual = select({
+        "@bazel_tools//src/conditions:windows": ":pywrap_litert_binaries_windows",
+        "//conditions:default": ":pywrap_litert_binaries_unix",
     }),
     visibility = ["//visibility:public"],
 )
