@@ -15,13 +15,9 @@
 
 load("@org_tensorflow//tensorflow:strict.default.bzl", "py_strict_library")
 
-package(
-    default_visibility = ["//litert:litert_python_users"],
-)
+package(default_visibility = ["//litert:litert_python_users"])
 
-# ----------------------------------------------------------------------
 # Common dependencies
-# ----------------------------------------------------------------------
 py_strict_library(
     name = "litert_pywrap_deps",
     visibility = ["//visibility:public"],
@@ -31,15 +27,12 @@ py_strict_library(
     ],
 )
 
-# ----------------------------------------------------------------------
-# Public selector (platform-aware)
-# ----------------------------------------------------------------------
+# Public selector: choose binaries per OS
 alias(
     name = "pywrap_litert_binaries",
     actual = select({
         "@bazel_tools//src/conditions:windows": "//litert/python/impl_windows:pywrap_litert_binaries_windows",
-        "//conditions:default": ":pywrap_litert_binaries_unix",
+        "//conditions:default": "//litert/python/impl_unix:pywrap_litert_binaries_unix",
     }),
     visibility = ["//visibility:public"],
 )
-
