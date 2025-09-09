@@ -76,9 +76,9 @@ jobs:
           rm -rf ~/.cache/bazel-macos
           
       - name: Setup Bazelisk
-        uses: bazelbuild/setup-bazelisk@v3
-        with:
-          bazelisk-version: latest
+        uses: bazel-contrib/setup-bazel@v2
+        # with:
+        #   bazelisk-version: latest
           
       - name: Verify Bazel version
         run: bazel --version
