@@ -1,4 +1,4 @@
-name: "CI-LiteRT-Mac"
+name: "CI-LiteRT-Mac-new"
 
 on:
   push:
