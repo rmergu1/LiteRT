@@ -70,6 +70,15 @@ jobs:
       - name: Clean build outputs if refreshing cache
         if: env.REFRESH_CACHE == 'true'
         run: bazel clean --expunge
+      - name: Clean Bazel & Cache
+        run: |
+          bazel clean --expunge
+          rm -rf ~/.cache/bazel-macos
+
+      - name: Install correct Bazel
+        uses: actions/setup-bazel@v4
+        with:
+          version: 7.6.1
 
       - name: Restore Bazel cache
         id: bazel-cache
@@ -84,43 +93,7 @@ jobs:
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_1 }}-
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_2 }}-
 
-      - name: Print runner & Bazel info
-        run: |
-          uname -a
-          echo "Runner OS: $RUNNER_OS or ${{ runner.os }}"
-          which bazel || true
-          bazel version || true
-          echo "Bazel info keys we need:"
-          bazel info output_base || true
-          bazel info execution_root || true
-          bazel info workspace || true
-
-      - name: Show def_parser files from bazel_tools (if present)
-        run: |
-          set -e
-          OUT_BASE=$(bazel info output_base 2>/dev/null || echo "")
-          if [ -n "$OUT_BASE" ]; then
-          echo "bazel output_base: $OUT_BASE"
-          if [ -d "${OUT_BASE}/external/bazel_tools/tools/def_parser" ]; then
-          ls -la "${OUT_BASE}/external/bazel_tools/tools/def_parser" || true
-          echo "--- no_op.bat head ---"
-          sed -n '1,40p' "${OUT_BASE}/external/bazel_tools/tools/def_parser/no_op.bat" || true
-          echo "--- no_op.sh head ---"
-          sed -n '1,40p' "${OUT_BASE}/external/bazel_tools/tools/def_parser/no_op.sh" || true
-          else
-          echo "No def_parser dir in output_base/external/bazel_tools/tools/def_parser"
-          fi
-          else
-          echo "bazel info output_base not available"
-          fi
-
-      - name: Aquery for WinDefFileParse actions (shows what created it)
-        run: |
-          set -e
-          echo "Running aquery for WinDefFileParse (may take a while)"
-          bazel aquery 'mnemonic("WinDefFileParse", //litert/...)' --output=text || true
-
-
+      
       - name: Build LiteRT targets
         run: |
           bazel build --disk_cache=~/.cache/bazel-macos \
