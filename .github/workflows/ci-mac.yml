@@ -1,4 +1,4 @@
-name: "CI-LiteRT-Mac-new"
+name: "CI-LiteRT-Mac"
 
 on:
   push:
@@ -8,9 +8,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "* * * * *"  # Daily cache refresh
-    # - cron: "0 10 * * *"  # Daily cache refresh
-
+    - cron: "0 10 * * *"  # Daily cache refresh
   workflow_dispatch:
     inputs:
       REFRESH_CACHE:
@@ -70,23 +68,6 @@ jobs:
       - name: Clean build outputs if refreshing cache
         if: env.REFRESH_CACHE == 'true'
         run: bazel clean --expunge
-      - name: Clean Bazel & Cache
-        run: |
-          bazel clean --expunge
-          rm -rf ~/.cache/bazel-macos
-          
-      - name: Setup Bazelisk
-        uses: bazel-contrib/setup-bazel@0.15.0
-        # with:
-        #   bazelisk-version: latest
-          
-      - name: Verify Bazel version
-        run: bazel --version
-
-      # - name: Install correct Bazel
-      #   uses: bazelbuild/setup-bazelisk@v3
-      #   # with:
-      #   #   bazel-version: 7.6.1
 
       - name: Restore Bazel cache
         id: bazel-cache
@@ -101,12 +82,9 @@ jobs:
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_1 }}-
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_2 }}-
 
-      
       - name: Build LiteRT targets
         run: |
           bazel build --disk_cache=~/.cache/bazel-macos \
-             --features=-windows_export_all_symbols \
-             --verbose_failures \
             //litert/python/... \
             //litert/core/... 
 
