@@ -19,6 +19,12 @@ package(
     default_visibility = ["//litert:litert_python_users"],
 )
 
+# Detect Windows
+config_setting(
+    name = "is_windows",
+    values = {"cpu": "x64_windows"},
+)
+
 # Common dependencies for pywrap targets
 py_strict_library(
     name = "litert_pywrap_deps",
@@ -29,24 +35,29 @@ py_strict_library(
     ],
 )
 
-# Unix/macOS-specific pywrap target
+# Cross-platform pywrap target
 pywrap_library(
-    name = "pywrap_litert_unix",
-    # No Windows .def files
-    common_lib_linkopts = {
-        "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
-    },
-    common_lib_version_scripts = {
-        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
-    },
+    name = "pywrap_litert",
+    common_lib_linkopts = select({
+        ":is_windows": [],  # Windows: rely on .def, handled separately
+        "//conditions:default": {
+            "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
+        },
+    }),
+    common_lib_version_scripts = select({
+        ":is_windows": {},  # no version script on Windows
+        "//conditions:default": {
+            "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
+        },
+    }),
     pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
-# Unix/macOS-specific binaries
+# Cross-platform binaries
 pywrap_binaries(
     name = "pywrap_litert_binaries",
-    dep = ":pywrap_litert_unix",
+    dep = ":pywrap_litert",
     visibility = ["//visibility:public"],
 )
