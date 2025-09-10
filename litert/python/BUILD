@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 load("@org_tensorflow//tensorflow:strict.default.bzl", "py_strict_library")
 load("@org_tensorflow//tensorflow:tensorflow.default.bzl", "pywrap_binaries", "pywrap_library")
 
@@ -46,21 +45,14 @@ pywrap_library(
     },
     common_lib_version_scripts = {
         "litert/python/pywrap_litert_common": select({
-            ":is_windows": None,  # disable on Windows
+            ":is_windows": None,  # disable version script on Windows
             "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
         }),
     },
-    # 👇 NEW: Disable .def generation on non-Windows
-    common_lib_def_files = select({
-        ":is_windows": {
-            # Windows can specify .def files here if needed
-            # "litert/python/pywrap_litert_common": "litert/python/_pywrap_litert_common.def",
-        },
-        "//conditions:default": {},
-    }),
-    pywrap_count = 2,  # actual number of pywrap libraries
-    visibility = ["//visibility:public"],
+    # 👇 Force-disable .def parsing on non-Windows
     deps = [":litert_pywrap_deps"],
+    pywrap_count = 2,
+    visibility = ["//visibility:public"],
 )
 
 # Cross-platform binaries
@@ -69,3 +61,4 @@ pywrap_binaries(
     dep = ":pywrap_litert",
     visibility = ["//visibility:public"],
 )
+
