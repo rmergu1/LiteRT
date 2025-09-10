@@ -38,18 +38,18 @@ py_strict_library(
 # Cross-platform pywrap target
 pywrap_library(
     name = "pywrap_litert",
-    common_lib_linkopts = select({
-        ":is_windows": [],  # Windows: rely on .def, handled separately
-        "//conditions:default": {
-            "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
-        },
-    }),
-    common_lib_version_scripts = select({
-        ":is_windows": {},  # no version script on Windows
-        "//conditions:default": {
-            "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
-        },
-    }),
+    common_lib_linkopts = {
+        "litert/python/pywrap_litert_common": select({
+            ":is_windows": [],
+            "//conditions:default": ["-Wl,-rpath,$$ORIGIN/"],
+        }),
+    },
+    common_lib_version_scripts = {
+        "litert/python/pywrap_litert_common": select({
+            ":is_windows": None,  # disable on Windows
+            "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
+        }),
+    },
     pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
