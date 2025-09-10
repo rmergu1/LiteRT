@@ -50,6 +50,14 @@ pywrap_library(
             "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
         }),
     },
+    # 👇 NEW: Disable .def generation on non-Windows
+    common_lib_def_files = select({
+        ":is_windows": {
+            # Windows can specify .def files here if needed
+            # "litert/python/pywrap_litert_common": "litert/python/_pywrap_litert_common.def",
+        },
+        "//conditions:default": {},
+    }),
     pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
