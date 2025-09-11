@@ -89,6 +89,7 @@ jobs:
       #       //litert/core/... 
       - name: Build LiteRT targets
         run: |
+          bazel clean --expunge
           bazel build  \
             //litert/python/... \
             //litert/core/... 
