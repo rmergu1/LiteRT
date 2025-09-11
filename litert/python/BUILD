@@ -12,53 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ---------------------------------------------------------------------------
-# Load macros from TensorFlow's Bazel extensions
-# ---------------------------------------------------------------------------
 load("@org_tensorflow//tensorflow:strict.default.bzl", "py_strict_library")
 load("@org_tensorflow//tensorflow:tensorflow.default.bzl", "pywrap_binaries", "pywrap_library")
 
-# By default, only expose to litert's Python users
 package(
     default_visibility = ["//litert:litert_python_users"],
 )
 
-# ---------------------------------------------------------------------------
-# Platform detection
-# ---------------------------------------------------------------------------
-config_setting(
-    name = "is_windows",
-    values = {"cpu": "x64_windows"},
-)
-
-# ---------------------------------------------------------------------------
-# Workaround: Stub targets to prevent WinDefFileParse on non-Windows
-# ---------------------------------------------------------------------------
-
-# Generates a harmless empty .def file.
-genrule(
-    name = "empty_def",
-    outs = ["empty.def"],
-    cmd = "mkdir -p $(dirname $@) && echo -n > $@",
-    visibility = ["//visibility:public"],
-)
-
-# Filegroup that matches the expected _pywrap_litert_common_def target.
-# On non-Windows, it provides the empty file so Bazel doesn't try to run
-# no_op.bat (which is Windows-only). On Windows, it does nothing so the
-# original pywrap rules still run normally.
-filegroup(
-    name = "_pywrap_litert_common_def",
-    srcs = select({
-        ":is_windows": [],                 # Windows builds → leave empty
-        "//conditions:default": [":empty_def"],  # Non-Windows builds → stub file
-    }),
-    visibility = ["//visibility:private"],
-)
-
-# ---------------------------------------------------------------------------
-# Dependencies used by pywrap_library
-# ---------------------------------------------------------------------------
+# Common dependencies for pywrap targets
 py_strict_library(
     name = "litert_pywrap_deps",
     visibility = ["//visibility:public"],
@@ -68,35 +29,24 @@ py_strict_library(
     ],
 )
 
-# ---------------------------------------------------------------------------
-# Cross-platform pywrap target
-# ---------------------------------------------------------------------------
+# Unix/macOS-specific pywrap target
 pywrap_library(
-    name = "pywrap_litert",
-    # Linker options for the common library
+    name = "pywrap_litert_unix",
+    # No Windows .def files
     common_lib_linkopts = {
-        "litert/python/pywrap_litert_common": select({
-            ":is_windows": [],  # No rpath tweaks on Windows
-            "//conditions:default": ["-Wl,-rpath,$$ORIGIN/"],
-        }),
+        "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
     },
-    # Version scripts for symbol visibility
     common_lib_version_scripts = {
-        "litert/python/pywrap_litert_common": select({
-            ":is_windows": None,  # Disable on Windows
-            "//conditions:default": "//tflite/python:pywrap_tflite_common.lds",
-        }),
+        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
     },
-    pywrap_count = 2,  # number of pywrap libraries in this package
+    pywrap_count = 2,  # actual number of pywrap libraries
     visibility = ["//visibility:public"],
     deps = [":litert_pywrap_deps"],
 )
 
-# ---------------------------------------------------------------------------
-# Cross-platform pywrap binaries
-# ---------------------------------------------------------------------------
+# Unix/macOS-specific binaries
 pywrap_binaries(
     name = "pywrap_litert_binaries",
-    dep = ":pywrap_litert",
+    dep = ":pywrap_litert_unix",
     visibility = ["//visibility:public"],
 )
