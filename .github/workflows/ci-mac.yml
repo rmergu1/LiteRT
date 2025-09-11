@@ -82,18 +82,29 @@ jobs:
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_1 }}-
             ${{ steps.cache-keys.outputs.CACHE_RESTORE_KEY_2 }}-
 
+      # - name: Build LiteRT targets
+      #   run: |
+      #     bazel build --disk_cache=~/.cache/bazel-macos \
+      #       //litert/python/... \
+      #       //litert/core/... 
       - name: Build LiteRT targets
         run: |
-          bazel build --disk_cache=~/.cache/bazel-macos \
+          bazel build  \
             //litert/python/... \
             //litert/core/... 
-
       - name: Run LiteRT tests
         run: |
-          bazel test --disk_cache=~/.cache/bazel-macos \
+          bazel test \
             --test_output=errors \
             //litert/python/... \
             //litert/core/... 
+
+      # - name: Run LiteRT tests
+      #   run: |
+      #     bazel test --disk_cache=~/.cache/bazel-macos \
+      #       --test_output=errors \
+      #       //litert/python/... \
+      #       //litert/core/... 
 
       - name: Remove cache if refreshing
         if: env.REFRESH_CACHE == 'true'
