@@ -18,7 +18,7 @@ package(
 default_visibility = ["//litert:litert_python_users"],
 )
 
-Common dependencies for all pywrap targets
+# Common dependencies for all pywrap targets
 py_strict_library(
 name = "litert_pywrap_deps",
 visibility = ["//visibility:public"],
@@ -28,7 +28,7 @@ deps = [
 ],
 )
 
-Unix/macOS-specific pywrap target
+# Unix/macOS-specific pywrap target
 pywrap_library(
 name = "pywrap_litert_unix",
 # No Windows .def files
@@ -43,7 +43,7 @@ visibility = ["//visibility:public"],
 deps = [":litert_pywrap_deps"],
 )
 
-Windows-specific pywrap target
+# Windows-specific pywrap target
 pywrap_library(
 name = "pywrap_litert_windows",
 # This rule requires a .def file for the Windows build to work correctly.
@@ -53,7 +53,7 @@ visibility = ["//visibility:public"],
 deps = [":litert_pywrap_deps"],
 )
 
-Use a select statement to choose the correct pywrap library based on the OS.
+# Use a select statement to choose the correct pywrap library based on the OS.
 pywrap_binaries(
 name = "pywrap_litert_binaries",
 dep = select({
