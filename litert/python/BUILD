@@ -16,37 +16,50 @@ load("@org_tensorflow//tensorflow:strict.default.bzl", "py_strict_library")
 load("@org_tensorflow//tensorflow:tensorflow.default.bzl", "pywrap_binaries", "pywrap_library")
 
 package(
-    default_visibility = ["//litert:litert_python_users"],
+default_visibility = ["//litert:litert_python_users"],
 )
 
-# Common dependencies for pywrap targets
+Common dependencies for all pywrap targets
 py_strict_library(
-    name = "litert_pywrap_deps",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//litert/python/litert_wrapper/compiled_model_wrapper:_pywrap_litert_compiled_model_wrapper",
-        "//litert/python/litert_wrapper/tensor_buffer_wrapper:_pywrap_litert_tensor_buffer_wrapper",
-    ],
+name = "litert_pywrap_deps",
+visibility = ["//visibility:public"],
+deps = [
+"//litert/python/litert_wrapper/compiled_model_wrapper:_pywrap_litert_compiled_model_wrapper",
+"//litert/python/litert_wrapper/tensor_buffer_wrapper:_pywrap_litert_tensor_buffer_wrapper",
+],
 )
 
-# Unix/macOS-specific pywrap target
+Unix/macOS-specific pywrap target
 pywrap_library(
-    name = "pywrap_litert_unix",
-    # No Windows .def files
-    common_lib_linkopts = {
-        "litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
-    },
-    common_lib_version_scripts = {
-        "litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
-    },
-    pywrap_count = 2,  # actual number of pywrap libraries
-    visibility = ["//visibility:public"],
-    deps = [":litert_pywrap_deps"],
+name = "pywrap_litert_unix",
+# No Windows .def files
+common_lib_linkopts = {
+"litert/python/pywrap_litert_common": ["-Wl,-rpath,$$ORIGIN/"],
+},
+common_lib_version_scripts = {
+"litert/python/pywrap_litert_common": "//tflite/python:pywrap_tflite_common.lds",
+},
+pywrap_count = 2,  # actual number of pywrap libraries
+visibility = ["//visibility:public"],
+deps = [":litert_pywrap_deps"],
 )
 
-# Unix/macOS-specific binaries
+Windows-specific pywrap target
+pywrap_library(
+name = "pywrap_litert_windows",
+# This rule requires a .def file for the Windows build to work correctly.
+def_file = ":_pywrap_litert_unix_common_def.gen.def",
+pywrap_count = 2,
+visibility = ["//visibility:public"],
+deps = [":litert_pywrap_deps"],
+)
+
+Use a select statement to choose the correct pywrap library based on the OS.
 pywrap_binaries(
-    name = "pywrap_litert_binaries",
-    dep = ":pywrap_litert_unix",
-    visibility = ["//visibility:public"],
+name = "pywrap_litert_binaries",
+dep = select({
+"@platforms//os:windows": ":pywrap_litert_windows",
+"//conditions:default": ":pywrap_litert_unix",
+}),
+visibility = ["//visibility:public"],
 )
